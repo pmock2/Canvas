@@ -1,0 +1,21 @@
+:root {
+    --default-font-color: black;
+    --body-background: white;
+}
+
+body[data-dark=true] {
+    --default-font-color: white;
+    --body-background: #222;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    padding: 15px;
+    color: var(--default-font-color);
+    background: var(--body-background);
+    overflow: hidden;
+}
+
+.draggable {
+    color: black;
+}
