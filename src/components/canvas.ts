@@ -26,7 +26,7 @@ export class Canvas {
                         dragItem.select(false);
                     });
 
-                    let newDraggable: DragItem = new DragItem(this.selectedDragItem.name);
+                    let newDraggable: DragItem = new DragItem(this.selectedDragItem.name, false, this.selectedDragItem.type);
                     newDraggable.element.style.left = `${e.x - 2}px`;
                     newDraggable.element.style.top = `${e.y - this.selectedDragItem.element.offsetHeight / 2}px`;
                     newDraggable.select(true);
@@ -37,7 +37,7 @@ export class Canvas {
 
                 this.selectedDragItem = null;
             }
-            else if (this.selectedDragItem !== null && this.selectedDragItem.isSticky) {
+            else if (this.selectedDragItem !== null) {
                 document.onmousemove = null;
                 this.selectedDragItem.shadowElement.remove();
                 this.selectedDragItem = null;

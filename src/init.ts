@@ -1,11 +1,13 @@
 import { DragItem } from "./library";
 import { Canvas } from "./components/canvas";
 import { ActionItemBox } from "./components/action-item-box";
+import { OperatorBox } from "./components/operator-item-box";
 
 export class Shell {
     shell: HTMLDivElement;
     canvas: Canvas;
     actionItemBox: ActionItemBox;
+    operatorItemBox: OperatorBox;
 
     constructor() {
         this.shell = document.querySelector('#shell');
@@ -18,6 +20,10 @@ export class Shell {
 
         this.actionItemBox = new ActionItemBox();
         this.shell.appendChild(this.actionItemBox.element);
+        
+        this.operatorItemBox = new OperatorBox();
+        this.shell.appendChild(this.operatorItemBox.element);
+        
     }
 }
 

@@ -1,14 +1,15 @@
 import { DragItem } from "../library";
+import { DraggableType } from "./drag-item";
 
 export class ActionItemBox {
     element: HTMLDivElement;
     
     
-    ifBlock: DragItem = new DragItem('If');
-    elseBlock: DragItem = new DragItem('Else', true);
-    thenBlock: DragItem = new DragItem('Then', true);
-    conditionBLock: DragItem = new DragItem('Condition', true);
-    actionBlock: DragItem = new DragItem('Action', true);
+    ifBlock: DragItem = new DragItem('If', true, DraggableType.CONNECTOR);
+    elseBlock: DragItem = new DragItem('Else', true, DraggableType.CONNECTOR);
+    thenBlock: DragItem = new DragItem('Then', true, DraggableType.CONNECTOR);
+    conditionBLock: DragItem = new DragItem('Condition', true, DraggableType.SQUARE_LARGE);
+    actionBlock: DragItem = new DragItem('Action', true, DraggableType.SQUARE_LARGE);
 
     constructor() {
         this.init();
@@ -18,23 +19,24 @@ export class ActionItemBox {
         this.element = document.createElement('div');
         this.element.classList.add('action-item-box');
 
-        this.ifBlock.element.classList.add('draggable-sticky-action-box');
+        this.ifBlock.element.classList.add('draggable-sticky');
+        this.ifBlock.element.classList.add('action-box');
         this.element.appendChild(this.ifBlock.element);
         
-        this.elseBlock.element.classList.add('draggable-sticky-action-box');
-        this.elseBlock.element.style.top = '10%';
+        this.elseBlock.element.classList.add('draggable-sticky');
+        this.elseBlock.element.classList.add('action-box');
         this.element.appendChild(this.elseBlock.element);
         
-        this.thenBlock.element.classList.add('draggable-sticky-action-box');
-        this.thenBlock.element.style.top = '20%';
+        this.thenBlock.element.classList.add('draggable-sticky');
+        this.thenBlock.element.classList.add('action-box');
         this.element.appendChild(this.thenBlock.element);
         
-        this.conditionBLock.element.classList.add('draggable-sticky-action-box');
-        this.conditionBLock.element.style.top = '30%';
+        this.conditionBLock.element.classList.add('draggable-sticky');
+        this.conditionBLock.element.classList.add('action-box');
         this.element.appendChild(this.conditionBLock.element);
         
-        this.actionBlock.element.classList.add('draggable-sticky-action-box');
-        this.actionBlock.element.style.top = '40%';
+        this.actionBlock.element.classList.add('draggable-sticky');
+        this.actionBlock.element.classList.add('action-box');
         this.element.appendChild(this.actionBlock.element);
         
     }

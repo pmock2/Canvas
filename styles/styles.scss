@@ -66,8 +66,8 @@ body {
 
     &[data-selected=true] {}
 
-    &:after,
-    &::before {
+    &.pointer:after,
+    &.pointer::before {
         content: '';
         display: block;
         position: absolute;
@@ -80,16 +80,24 @@ body {
 
     }
 
-    /* this border color controlls the color of the triangle (what looks like the fill of the triangle) */
-    &:after {
+    /* this border color controls the color of the triangle (what looks like the fill of the triangle) */
+    &.pointer:after {
         border-color: transparent transparent transparent #247BA0;
         border-width: 14px;
     }
 
-    /* this border color controlls the outside, thin border */
-    &:before {
+    /* this border color controls the outside, thin border */
+    &.pointer:before {
         border-color: transparent transparent transparent rgba(0, 0, 0, 0.6);
         border-width: 15px;
+    }
+
+    &.square {}
+
+    &.square-large {
+        border-radius: 4px;
+        min-width: 80px;
+        min-height: 80px;
     }
 
     .text {
@@ -98,9 +106,20 @@ body {
 
 }
 
-.draggable-sticky-action-box {
-    @include centerX();
-    position: absolute;
+.draggable-sticky {
+    position: relative;
+
+    &.action-box {
+        @include centerX();
+    }
+
+    &.operator-box-container {
+        @include centerY();
+    }
+
+    &.pointer {
+        transform: translateX(-35px);
+    }
 }
 
 .draggable-shadow {
@@ -109,12 +128,12 @@ body {
 }
 
 .canvas {
-    width: 90%;
-    height: 90%;
+    width: calc(100% - 200px);
+    height: calc(100% - 80px);
     background-color: #fdfeff;
     background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;
     background-image: linear-gradient(rgba(0, 0, 0, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 0, 0, 0.1) 1px, transparent 1px), linear-gradient(rgba(0, 0, 0, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 0, 0, 0.1) 1px, transparent 1px);
-    right: 0;
+    left: 192px;
     bottom: 0;
     position: fixed;
 }
@@ -123,9 +142,28 @@ body {
     position: fixed;
     left: 0px;
     bottom: 0;
+    top: 80px;
     width: 169px;
-    height: calc(90% - 23px);
     background: white;
-    padding: 10px;
+    padding: 110px 10px;
     border: 2px solid rgba(0, 0, 0, 0.3);
+    display: flex;
+    overflow: auto;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: space-between;
+}
+
+.operator-box {
+    position: fixed;
+    left: 0px;
+    top: 0;
+    height: 60px;
+    background: white;
+    padding: 10px 100px;
+    border: 2px solid rgba(0, 0, 0, 0.3);
+    display: flex;
+    right: 0;
+    align-items: flex-start;
+    justify-content: space-between;
 }
