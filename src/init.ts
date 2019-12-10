@@ -8,6 +8,7 @@ export class Shell {
     canvas: Canvas;
     actionItemBox: ActionItemBox;
     operatorItemBox: OperatorBox;
+    ctrlKey: boolean;
 
     constructor() {
         this.shell = document.querySelector('#shell');
@@ -24,6 +25,18 @@ export class Shell {
         this.operatorItemBox = new OperatorBox();
         this.shell.appendChild(this.operatorItemBox.element);
         
+        document.onkeydown = (k: KeyboardEvent) => {
+            let keyCode = k.keyCode;
+            if (k.ctrlKey) {
+                this.ctrlKey = true;
+            }
+        }
+
+        document.onkeyup = (k: KeyboardEvent) => {
+            if (k.ctrlKey) {
+                this.ctrlKey = false;
+            }
+        }
     }
 }
 

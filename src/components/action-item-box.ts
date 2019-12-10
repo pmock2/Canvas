@@ -1,5 +1,5 @@
 import { DragItem } from "../library";
-import { DraggableType } from "./drag-item";
+import { DraggableType, DraggableFunction } from "./drag-item";
 
 export class ActionItemBox {
     element: HTMLDivElement;
@@ -8,7 +8,7 @@ export class ActionItemBox {
     ifBlock: DragItem = new DragItem('If', true, DraggableType.CONNECTOR);
     elseBlock: DragItem = new DragItem('Else', true, DraggableType.CONNECTOR);
     thenBlock: DragItem = new DragItem('Then', true, DraggableType.CONNECTOR);
-    conditionBLock: DragItem = new DragItem('Condition', true, DraggableType.SQUARE_LARGE);
+    conditionBLock: DragItem = new DragItem('Condition', true, DraggableType.SQUARE_LARGE, DraggableFunction.CONDITION);
     actionBlock: DragItem = new DragItem('Action', true, DraggableType.SQUARE_LARGE);
 
     constructor() {

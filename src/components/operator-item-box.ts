@@ -1,16 +1,18 @@
 import { DragItem } from "../library";
+import { DraggableType, DraggableFunction } from "./drag-item";
+import { OperatorBlock } from "./draggable-types/operator-block";
 
 export class OperatorBox {
     element: HTMLDivElement;
     
-    isBlock: DragItem = new DragItem('IS');
-    isNotBlock: DragItem = new DragItem('IS NOT', true);
-    andBlock: DragItem = new DragItem('AND', true);
-    orBlock: DragItem = new DragItem('OR', true);
-    greaterThanBlock: DragItem = new DragItem('>', true);
-    lessThanBlock: DragItem = new DragItem('<', true);
-    greaterThanOrEqualToBlock: DragItem = new DragItem('>=', true);
-    lessThanOrEqualToBlock: DragItem = new DragItem('<=', true);
+    isBlock: OperatorBlock = new OperatorBlock('=', true);
+    isNotBlock: OperatorBlock = new OperatorBlock('=/=', true);
+    greaterThanBlock: OperatorBlock = new OperatorBlock('>', true);
+    lessThanBlock: OperatorBlock = new OperatorBlock('<', true);
+    greaterThanOrEqualToBlock: OperatorBlock = new OperatorBlock('>=', true);
+    lessThanOrEqualToBlock: OperatorBlock = new OperatorBlock('<=', true);
+    andBlock: OperatorBlock = new OperatorBlock('AND', true);
+    orBlock: OperatorBlock = new OperatorBlock('OR', true);
     
     constructor() {
         this.init();
@@ -28,14 +30,6 @@ export class OperatorBox {
         this.isNotBlock.element.classList.add('operator-box-container');
         this.element.appendChild(this.isNotBlock.element);
 
-        this.andBlock.element.classList.add('draggable-sticky');
-        this.andBlock.element.classList.add('operator-box-container');
-        this.element.appendChild(this.andBlock.element);
-
-        this.orBlock.element.classList.add('draggable-sticky');
-        this.orBlock.element.classList.add('operator-box-container');
-        this.element.appendChild(this.orBlock.element);
-
         this.greaterThanBlock.element.classList.add('draggable-sticky');
         this.greaterThanBlock.element.classList.add('operator-box-container');
         this.element.appendChild(this.greaterThanBlock.element);
@@ -51,6 +45,13 @@ export class OperatorBox {
         this.lessThanOrEqualToBlock.element.classList.add('draggable-sticky');
         this.lessThanOrEqualToBlock.element.classList.add('operator-box-container');
         this.element.appendChild(this.lessThanOrEqualToBlock.element);
-        
+
+        this.andBlock.element.classList.add('draggable-sticky');
+        this.andBlock.element.classList.add('operator-box-container');
+        this.element.appendChild(this.andBlock.element);
+
+        this.orBlock.element.classList.add('draggable-sticky');
+        this.orBlock.element.classList.add('operator-box-container');
+        this.element.appendChild(this.orBlock.element);
     }
 }

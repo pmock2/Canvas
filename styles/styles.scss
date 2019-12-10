@@ -57,14 +57,19 @@ body {
     position: fixed;
     color: white;
     transition: box-shadow 0.2s;
-    border: 1px solid rgba(0, 0, 0, 0.2);
+    border: 2px solid rgba(0, 0, 0, 0.2);
     border-right: 0;
-    padding: 2px;
-    box-shadow: 0px 1px 9px 2px rgba(0, 0, 0, 0.4);
+    padding: 2px 6px;
+    box-shadow: 0px 1px 6px 1px rgba(0, 0, 0, 0.25);
     @include no-select();
 
+    .grounded {
+        position: absolute !important;
+    }
 
-    &[data-selected=true] {}
+    &[data-selected=true] {
+        border: 2px solid #10b2ea;
+    }
 
     &.pointer:after,
     &.pointer::before {
@@ -89,10 +94,18 @@ body {
     /* this border color controls the outside, thin border */
     &.pointer:before {
         border-color: transparent transparent transparent rgba(0, 0, 0, 0.6);
-        border-width: 15px;
+        border-width: 16px;
     }
 
-    &.square {}
+    &[data-selected=true].pointer:before {
+        border-color: transparent transparent transparent #10b2ea;
+    }
+
+    &.square {
+        background: white;
+        color: black;
+        // font-weight: bold;
+    }
 
     &.square-large {
         border-radius: 4px;
@@ -100,10 +113,74 @@ body {
         min-height: 80px;
     }
 
-    .text {
-        margin: auto;
+    &.rounded {
+        border-radius: 14px;
     }
 
+    &.condition-block {
+        min-width: 120px;
+        display: flex;
+        min-height: 140px;
+        flex-direction: column;
+        align-items: center;
+        padding: 12px;
+        justify-content: space-between;
+
+        .drop-zone,
+        .drop-zone-long {
+            background: white;
+            height: 22px;
+            width: 55px;
+            cursor: default;
+            border: 1px solid rgba(0, 0, 0, 0.4);
+            padding: 2px 6px;
+            color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .drop-zone-long {
+            width: 80%;
+        }
+
+        .draggable-input {
+            background: white;
+            width: 80%;
+            height: 20px;
+            text-align: center;
+            padding: 12px;
+        }
+    }
+
+    .text {
+        margin: auto;
+        pointer-events: none;
+    }
+
+    .drag-label {
+        visibility: hidden;
+        opacity: 0;
+        transition: opacity 0.1s;
+        border-radius: 2px;
+        position: absolute;
+        bottom: -20px;
+        background: rgba(0, 0, 0, 0.5);
+        color: white;
+        padding: 2px 10px;
+        font-size: 10px;
+        transition-delay: 0.5s;
+    }
+
+    &:hover .drag-label {
+        opacity: 1;
+        visibility: visible;
+    }
+
+}
+
+.operator-drop {
+    border-radius: 14px;
 }
 
 .draggable-sticky {
@@ -125,6 +202,12 @@ body {
 .draggable-shadow {
     opacity: 0.5;
     pointer-events: none;
+}
+
+.operator-block {
+    background: #a0ffa0;
+    color: black;
+    font-weight: bold;
 }
 
 .canvas {
@@ -166,4 +249,10 @@ body {
     right: 0;
     align-items: flex-start;
     justify-content: space-between;
+}
+
+.drag-select {
+    position: fixed;
+    border: 1px solid blue;
+    background: rgba(0, 50, 255, 0.08);
 }
