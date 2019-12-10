@@ -30,6 +30,24 @@ export class Shell {
             if (k.ctrlKey) {
                 this.ctrlKey = true;
             }
+            switch (k.keyCode) {
+                case 46: {
+                    var toRemove: any = {};
+                    let i = 0;
+                    this.canvas.dragItems.forEach((item) => {
+                       if (item.selected) {
+                           toRemove[i] = item;
+                           item.element.remove();
+                       }
+                       i++;
+                    });
+                    for (let i = 0; i < this.canvas.dragItems.length; i++) {
+                        if (toRemove[i] !== undefined && toRemove[i] !== null) {
+                            this.canvas.dragItems.splice(i, 1)
+                        }
+                    }   // toRemove.
+                }
+            }
         }
 
         document.onkeyup = (k: KeyboardEvent) => {
