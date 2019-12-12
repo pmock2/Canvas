@@ -118,7 +118,7 @@ body {
     }
 
     &.condition-block {
-        min-width: 120px;
+        min-width: 100px;
         display: flex;
         min-height: 140px;
         flex-direction: column;
@@ -195,7 +195,7 @@ body {
     }
 
     &.pointer {
-        transform: translateX(-35px);
+        transform: translateX(-40px);
     }
 }
 
@@ -239,9 +239,9 @@ body {
 
 .operator-box {
     position: fixed;
-    left: 0px;
+    left: 191px;
     top: 0;
-    height: 60px;
+    height: 58px;
     background: white;
     padding: 10px 100px;
     border: 2px solid rgba(0, 0, 0, 0.3);

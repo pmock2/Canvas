@@ -1,7 +1,11 @@
-import { DragItem } from "../../library";
+import { DragItem, applicationShell } from "../../library";
 import { DraggableType, DraggableFunction } from "../drag-item";
+import { OperatorBlock } from "./operator-block";
 
 export class ConditionBlock extends DragItem {
+    
+    operator: DragItem;
+    
     constructor() {
         super('', false, DraggableType.SQUARE_LARGE, DraggableFunction.CONDITION);
         this.init();
@@ -18,5 +22,38 @@ export class ConditionBlock extends DragItem {
         `;
         this.element.innerHTML = innerHtml;
         this.element.classList.add('condition-block');
+        this.wireUpConditionBlock();
+    }
+    
+    attachOperator(operatorBlock: OperatorBlock): void {
+        if (operatorBlock.draggableFunction = DraggableFunction.OPERATOR) {
+            var operatorBlockToUse: OperatorBlock;
+            if (operatorBlock.isSticky) {
+                operatorBlockToUse = new OperatorBlock(operatorBlock.name);
+            } else {
+                operatorBlockToUse = operatorBlock;
+            }
+            this.operator = operatorBlockToUse;
+            operatorBlockToUse.anchor(true, this);
+            this.element.querySelector('.operator-drop').appendChild(this.operator.element);
+            applicationShell.canvas.dragItems.push(this.operator);
+        }
+    }
+    
+    wireUpConditionBlock(): void {
+        this.element.onmouseup = (e) => {
+            let target = e.target as HTMLElement
+            if (applicationShell.canvas.draggingItem !== null && applicationShell.canvas.draggingItem !== undefined) {
+                //attach dropped item
+                switch (applicationShell.canvas.draggingItem.draggableFunction) {
+                    case DraggableFunction.OPERATOR: {
+                        if (target.classList.contains('operator-drop') && applicationShell.canvas.draggingItem instanceof OperatorBlock) {
+                            this.attachOperator(applicationShell.canvas.draggingItem);
+                        }
+                        break;
+                    }
+                }
+            }
+        }
     }
 }

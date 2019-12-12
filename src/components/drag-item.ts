@@ -12,6 +12,9 @@ export class DragItem {
     isSticky: boolean;
     type: DraggableType;
     draggableFunction: DraggableFunction;
+    isAnchored: boolean;
+    anchoredTo: DragItem;
+    anchoredItems: Array<DragItem> = new Array<DragItem>();
 
     constructor(name: string, isSticky: boolean = false, type: DraggableType = DraggableType.SQUARE, draggableFunction: DraggableFunction = null) {
 
@@ -65,30 +68,10 @@ export class DragItem {
 
     wireItUp(): void {
         this.element.onmousedown = (e: MouseEvent) => {
-            zIndexPlus(this.element);
-            
-            let startingX = e.x;
-            let startingY = e.y;
-            
-            let elementToUse = this.isSticky ? this.shadowElement : this.element;
-            
-            if (this.isSticky) {
-                document.body.appendChild(this.shadowElement);
-                this.shadowElement.style.top = `${e.y - this.shadowElement.offsetHeight / 2}`;
-                this.shadowElement.style.left = `${e.x - 2}px`
-            }
-            
-            let originalLeft: number = parseInt(elementToUse.style.left.replace('px', ''));
-            let originalTop: number = parseInt(elementToUse.style.top.replace('px', ''));
-            
-            applicationShell.canvas.selectedDragItem = this;
-            document.onmousemove = (m: MouseEvent) => {
-                this.mouseMove(m, startingX, startingY, originalLeft, originalTop, elementToUse);
-            }
+            this.mouseDown(e);
         };
 
         this.element.onclick = (e) => {
-            console.log('clicked')
             if (!applicationShell.ctrlKey) {
                 applicationShell.canvas.dragItems.forEach((dragItem) => {
                     dragItem.select(false);
@@ -98,6 +81,50 @@ export class DragItem {
             this.select(true);
         }
 
+    }
+    
+    mouseDown(e: MouseEvent): void {
+        let isDraggingChild = false;
+        this.anchoredItems.forEach((item) => {
+           if (item === applicationShell.canvas.draggingItem) {
+               isDraggingChild = true;
+           } 
+        });
+        
+        if (isDraggingChild) {
+            return;
+        }
+        
+        console.log(isDraggingChild);
+        
+        applicationShell.canvas.draggingItem = this;
+
+        zIndexPlus(this.element);
+
+        let startingX = e.x;
+        let startingY = e.y;
+
+        if (this.isAnchored) {
+            this.anchor(false);
+            applicationShell.canvas.element.append(this.element);
+            this.element.style.left = `${startingX - 2}px`;
+            this.element.style.top = `${startingY - this.element.offsetHeight / 2}px`;
+        }
+
+        let elementToUse = this.isSticky ? this.shadowElement : this.element;
+
+        if (this.isSticky) {
+            document.body.appendChild(this.shadowElement);
+            this.shadowElement.style.top = `${e.y - this.shadowElement.offsetHeight / 2}`;
+            this.shadowElement.style.left = `${e.x - 2}px`
+        }
+
+        let originalLeft: number = parseInt(elementToUse.style.left.replace('px', ''));
+        let originalTop: number = parseInt(elementToUse.style.top.replace('px', ''));
+
+        document.onmousemove = (m: MouseEvent) => {
+            this.mouseMove(m, startingX, startingY, originalLeft, originalTop, elementToUse);
+        }
     }
 
     mouseMove(e: MouseEvent, startingX: number, startingY: number, originalLeft: number, originalTop: number, dragElement: HTMLElement): void {
@@ -123,13 +150,16 @@ export class DragItem {
         this.selected = select;
     }
     
-    ground(ground: boolean): void {
-        if (ground) {
+    anchor(anchor: boolean, anchoredTo: DragItem = null): void {
+        this.isAnchored = anchor;
+        if (anchor) {
             this.element.classList.add('grounded');
             this.element.style.removeProperty('left');
             this.element.style.removeProperty('top');
             this.element.style.removeProperty('z-index');
             this.element.style.removeProperty('pointer-events');
+            this.anchoredTo = anchoredTo;
+            this.anchoredTo.anchoredItems.push(this);
         }
         else {
             this.element.classList.remove('grounded');

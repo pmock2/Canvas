@@ -5,7 +5,7 @@ import { OperatorBlock } from "./draggable-types/operator-block";
 
 export class Canvas {
     element: HTMLDivElement;
-    selectedDragItem: DragItem;
+    draggingItem: DragItem;
     dragItems: Array<DragItem> = [];
     select: HTMLDivElement = document.createElement('div');
 
@@ -24,22 +24,22 @@ export class Canvas {
 
             let target = e.target as HTMLElement;
             
-            if (target.classList.contains('canvas') && this.selectedDragItem !== null) {
+            if (target.classList.contains('canvas') && this.draggingItem !== null && this.draggingItem !== undefined) {
                 this.disableEnableDragItems(false);
                 document.onmousemove = null;
 
-                if (this.selectedDragItem !== undefined && this.selectedDragItem.isSticky) {
-                    this.selectedDragItem.shadowElement.remove();
+                if (this.draggingItem.isSticky) {
+                    this.draggingItem.shadowElement.remove();
 
                     this.dragItems.forEach((dragItem) => {
                         dragItem.select(false);
                     });
 
-                    switch (this.selectedDragItem.draggableFunction) {
+                    switch (this.draggingItem.draggableFunction) {
                         case DraggableFunction.CONDITION: {
                             let newConditional: ConditionBlock = new ConditionBlock();
                             newConditional.element.style.left = `${e.x - 2}px`;
-                            newConditional.element.style.top = `${e.y - this.selectedDragItem.element.offsetHeight / 2}px`;
+                            newConditional.element.style.top = `${e.y - this.draggingItem.element.offsetHeight / 2}px`;
 
                             newConditional.select(true);
 
@@ -50,9 +50,9 @@ export class Canvas {
                             break;
                         }
                         case DraggableFunction.OPERATOR: {
-                            let newOperator = new OperatorBlock(this.selectedDragItem.name);
+                            let newOperator = new OperatorBlock(this.draggingItem.name);
                             newOperator.element.style.left = `${e.x - 2}px`;
-                            newOperator.element.style.top = `${e.y - this.selectedDragItem.element.offsetHeight / 2}px`;
+                            newOperator.element.style.top = `${e.y - this.draggingItem.element.offsetHeight / 2}px`;
 
                             newOperator.select(true);
 
@@ -63,9 +63,9 @@ export class Canvas {
                             break;
                         }
                         default: {
-                            let newDraggable: DragItem = new DragItem(this.selectedDragItem.name, false, this.selectedDragItem.type, this.selectedDragItem.draggableFunction);
+                            let newDraggable: DragItem = new DragItem(this.draggingItem.name, false, this.draggingItem.type, this.draggingItem.draggableFunction);
                             newDraggable.element.style.left = `${e.x - 2}px`;
-                            newDraggable.element.style.top = `${e.y - this.selectedDragItem.element.offsetHeight / 2}px`;
+                            newDraggable.element.style.top = `${e.y - this.draggingItem.element.offsetHeight / 2}px`;
                             newDraggable.select(true);
 
                             zIndexPlus(newDraggable.element);
@@ -75,50 +75,39 @@ export class Canvas {
                             break;
                         }
                     }
+                } else {
+                    if (this.draggingItem.anchoredTo !== null && this.draggingItem.anchoredTo !== undefined) {
+                        let index = 0;
+                        let foundIt = false;
+
+                        this.draggingItem.anchoredTo.anchoredItems.forEach((item) => {
+                           if (!foundIt) {
+                               if (item === this.draggingItem) {
+                                   foundIt = true
+                               } else {
+                                   index++;
+                               }
+                           } 
+                        });
+
+                        if (foundIt) {
+                            this.draggingItem.anchoredTo.anchoredItems.splice(index, 1)
+                        }
+
+                        this.draggingItem.anchoredTo = null;
+                    }
                 }
 
-                this.selectedDragItem = null;
+                this.draggingItem = null;
             }
-            else if (this.selectedDragItem !== null && this.selectedDragItem !== undefined) {
-                //check each draggable to see if the selected draggable was dropped on another draggable
-                let foundDrop = false;
-                this.dragItems.forEach((item) => {
-                    if (item !== this.selectedDragItem && !foundDrop) {
-                        let rect = item.element.getBoundingClientRect();
-                        let rectSelection = (this.selectedDragItem.isSticky ? this.selectedDragItem.shadowElement : this.selectedDragItem.element).getBoundingClientRect();
-                        if (rect.top + rect.height > rectSelection.top
-                            && rect.left + rect.width > rectSelection.left
-                            && rect.bottom - rect.height < rectSelection.bottom
-                            && rect.right - rect.width < rectSelection.right) {
-
-                            foundDrop = true;
-                            switch (item.draggableFunction) {
-                                //condition block
-                                case 0: {
-                                    let operatorBlock = new OperatorBlock(this.selectedDragItem.name);
-                                    if (target.classList.contains('operator-drop') && this.selectedDragItem.draggableFunction === DraggableFunction.OPERATOR) {
-                                        if (!this.selectedDragItem.isSticky) {
-                                            this.selectedDragItem.element.remove();
-                                        }
-                                        operatorBlock.ground(true);
-                                        target.appendChild(operatorBlock.element);
-                                    }
-                                    break;
-                                }
-                            }
-
-                        }
-                    }
-                });
+            else if (this.draggingItem !== null && this.draggingItem !== undefined) {
                 this.disableEnableDragItems(false);
                 document.onmousemove = null;
-                this.selectedDragItem.shadowElement.remove();
-                this.selectedDragItem = null;
+                this.draggingItem.shadowElement.remove();
+                this.draggingItem = null;
             }
             else {
-                console.log('something else');
-                console.log(target.classList);
-                console.log(this.selectedDragItem);
+
             }
         };
 
@@ -194,11 +183,11 @@ export class Canvas {
     }
 
     disableEnableDragItems(disable: boolean): void {
-        if (this.selectedDragItem !== undefined && this.selectedDragItem !== null) {
+        if (this.draggingItem !== undefined && this.draggingItem !== null) {
             if (disable) {
-                this.selectedDragItem.element.style.pointerEvents = 'none'
+                this.draggingItem.element.style.pointerEvents = 'none'
             } else {
-                this.selectedDragItem.element.style.removeProperty('pointer-events');
+                this.draggingItem.element.style.removeProperty('pointer-events');
             }
         }
 
