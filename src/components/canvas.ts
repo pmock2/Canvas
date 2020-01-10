@@ -1,7 +1,10 @@
-import { DragItem, DraggableFunction, DraggableType } from "./drag-item";
-import { ConditionBlock } from "./draggable-types/condition-block";
+import { ConditionBlock, ConditionType } from "./draggable-types/condition-block";
 import { zIndexPlus } from "../library";
 import { OperatorBlock } from "./draggable-types/operator-block";
+import { VariableBlock } from "./draggable-types/variable-block";
+import { ConnectorBlock } from "./draggable-types/connector-block";
+import { DragItem, DraggableFunction, DraggableType } from "./drag-item";
+import { ActionBlock } from "./draggable-types/action-block";
 
 export class Canvas {
     element: HTMLDivElement;
@@ -21,6 +24,7 @@ export class Canvas {
         document.onmouseup = (e) => {
             this.select.remove();
             document.onmousemove = null;
+            document.body.dataset.dragging = 'false';
 
             let target = e.target as HTMLElement;
             
@@ -37,16 +41,18 @@ export class Canvas {
 
                     switch (this.draggingItem.draggableFunction) {
                         case DraggableFunction.CONDITION: {
-                            let newConditional: ConditionBlock = new ConditionBlock();
-                            newConditional.element.style.left = `${e.x - 2}px`;
-                            newConditional.element.style.top = `${e.y - this.draggingItem.element.offsetHeight / 2}px`;
+                            if (this.draggingItem instanceof ConditionBlock) {
+                                let newConditional: ConditionBlock = new ConditionBlock();
+                                newConditional.element.style.left = `${e.x - 2}px`;
+                                newConditional.element.style.top = `${e.y - this.draggingItem.element.offsetHeight / 2 - 30}px`;
 
-                            newConditional.select(true);
+                                newConditional.select(true);
 
-                            zIndexPlus(newConditional.element);
+                                zIndexPlus(newConditional.element);
 
-                            this.dragItems.push(newConditional);
-                            this.element.appendChild(newConditional.element);
+                                this.dragItems.push(newConditional);
+                                this.element.appendChild(newConditional.element);
+                            }
                             break;
                         }
                         case DraggableFunction.OPERATOR: {
@@ -62,6 +68,49 @@ export class Canvas {
                             this.element.appendChild(newOperator.element);
                             break;
                         }
+                        case DraggableFunction.VARIABLE: {
+                            let newVariableBlock = new VariableBlock(this.draggingItem.name);
+                            newVariableBlock.element.style.left = `${e.x - 2}px`;
+                            newVariableBlock.element.style.top = `${e.y - this.draggingItem.element.offsetHeight / 2}px`;
+
+                            newVariableBlock.select(true);
+
+                            zIndexPlus(newVariableBlock.element);
+
+                            this.dragItems.push(newVariableBlock);
+                            this.element.appendChild(newVariableBlock.element);
+                            break;
+                        }
+                        case DraggableFunction.ACTION: {
+                            let newActionBlock = new ActionBlock();
+                            newActionBlock.element.style.left = `${e.x - 2}px`;
+                            newActionBlock.element.style.top = `${e.y - this.draggingItem.element.offsetHeight / 2}px`;
+
+                            newActionBlock.select(true);
+
+                            zIndexPlus(newActionBlock.element);
+
+                            this.dragItems.push(newActionBlock);
+                            this.element.appendChild(newActionBlock.element);
+                            break;
+                        }
+                        case DraggableFunction.THEN:
+                        case DraggableFunction.ELSE:
+                        case DraggableFunction.AND:
+                        case DraggableFunction.OR: {
+                            let connectorBlock = new ConnectorBlock(this.draggingItem.name, false, DraggableType.CONNECTOR, this.draggingItem.draggableFunction);
+                            connectorBlock.element.style.left = `${e.x - 2}px`;
+                            connectorBlock.element.style.top = `${e.y - this.draggingItem.element.offsetHeight / 2}px`;
+
+                            connectorBlock.select(true);
+
+                            zIndexPlus(connectorBlock.element);
+
+                            this.dragItems.push(connectorBlock);
+                            this.element.appendChild(connectorBlock.element);
+                            break;
+                        }
+                        
                         default: {
                             let newDraggable: DragItem = new DragItem(this.draggingItem.name, false, this.draggingItem.type, this.draggingItem.draggableFunction);
                             newDraggable.element.style.left = `${e.x - 2}px`;
@@ -140,19 +189,19 @@ export class Canvas {
                     let newWidth = currentX - startingX;
                     let newHeight = currentY - startingY;
                     
-                    let flipVertical = newHeight < 0;
-                    let flipHorizontal = newWidth < 0;
+                    if (currentX <= startingX) {
+                        this.select.style.left = `${currentX}px`;
+                    }
                     
-                    let transform = `rotateX(${flipVertical ? '180' : '0'}deg) rotateY(${flipHorizontal ? '180' : '0'}deg)`
+                    if (currentY <= startingY) {
+                        this.select.style.top = `${currentY}px`;
+                    }
                     
-                    this.select.style.transform = transform;
 
                     this.select.style.width = `${Math.abs(newWidth)}px`;
                     this.select.style.height = `${Math.abs(newHeight)}px`;
                     
-
                     let rectSelection = this.select.getBoundingClientRect();
-
 
                     this.dragItems.forEach((item) => {
                         var rect = item.element.getBoundingClientRect();
@@ -184,19 +233,11 @@ export class Canvas {
 
     disableEnableDragItems(disable: boolean): void {
         if (this.draggingItem !== undefined && this.draggingItem !== null) {
-            if (disable) {
-                this.draggingItem.element.style.pointerEvents = 'none'
-            } else {
-                this.draggingItem.element.style.removeProperty('pointer-events');
-            }
+            this.draggingItem.element.dataset.dragging = disable.toString();
         }
-
+        
         this.dragItems.forEach((item) => {
-            if (disable) {
-                item.element.style.pointerEvents = 'none'
-            } else {
-                item.element.style.removeProperty('pointer-events');
-            }
+                item.element.dataset.dragging = disable.toString();
         });
     }
 }

@@ -23,6 +23,12 @@
     transform: translateY(-50%);
 }
 
+@mixin center {
+    top: 50%;
+    left: 50%;
+    transform: translateY(-50%) translateX(-50%);
+}
+
 :root {
     --default-font-color: black;
     --body-background: white;
@@ -48,7 +54,6 @@ body {
 .draggable {
     color: black;
     cursor: move;
-    background: #247BA0;
     display: flex;
     justify-content: center;
     width: 55px;
@@ -56,19 +61,58 @@ body {
     font-size: 12px;
     position: fixed;
     color: white;
-    transition: box-shadow 0.2s;
+    transition: box-shadow 0.2s, opacity 0.2s, border 0.2s;
     border: 2px solid rgba(0, 0, 0, 0.2);
     border-right: 0;
     padding: 2px 6px;
     box-shadow: 0px 1px 6px 1px rgba(0, 0, 0, 0.25);
+    text-align: center;
     @include no-select();
 
     .grounded {
         position: absolute !important;
+        box-shadow: none;
+    }
+
+    &[data-dragging=true] {
+        pointer-events: none;
+        opacity: 0.4;
+    }
+
+    .triangle-crop {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        pointer-events: none;
+
+        &::before {
+            content: '';
+            display: block;
+            position: absolute;
+            left: 0;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            @include centerY;
+            content: '';
+
+        }
+
+        &:before {
+            border-color: transparent transparent transparent rgba(0, 0, 0, 0.2);
+            border-width: 16px;
+        }
+
+        &[data-hover=true]::before {
+            border-color: transparent transparent transparent cyan;
+        }
     }
 
     &[data-selected=true] {
         border: 2px solid #10b2ea;
+        border-right: 2px solid #10b2ea !important;
     }
 
     &.pointer:after,
@@ -101,23 +145,97 @@ body {
         border-color: transparent transparent transparent #10b2ea;
     }
 
+    &[data-hover=true]:after {
+        border-color: transparent transparent transparent cyan;
+        border-width: 14px;
+    }
+
     &.square {
         background: white;
         color: black;
-        // font-weight: bold;
+        min-width: 55px;
+        width: fit-content;
     }
 
     &.square-large {
         border-radius: 4px;
-        min-width: 80px;
-        min-height: 80px;
+        min-width: 80px !important;
+        min-height: 80px !important;
+        background: #247BA0;
     }
 
     &.rounded {
         border-radius: 14px;
+        background: #247BA0;
+    }
+
+    &.connector {
+        background: #247BA0;
+    }
+
+    &.draggable-sticky.connector-large {
+        min-width: 80px !important;
+        min-height: 80px !important;
+    }
+
+    &.connector-large {
+        border-radius: 4px;
+        background: #247BA0;
+
+        &:after,
+        &::before {
+            content: '';
+            display: block;
+            position: absolute;
+            left: 100%;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            @include centerY;
+            content: '';
+
+        }
+
+        /* this border color controls the color of the triangle (what looks like the fill of the triangle) */
+        &:after {
+            border-color: transparent transparent transparent #247BA0;
+            border-width: 14px;
+        }
+
+        /* this border color controls the outside, thin border */
+        &:before {
+            border-color: transparent transparent transparent rgba(0, 0, 0, 0.6);
+            border-width: 16px;
+        }
+
+        &[data-hover=true]:after {
+            border-color: transparent transparent transparent cyan;
+            border-width: 14px;
+        }
+    }
+
+    &.action-block {
+        height: 100px;
+        width: 100px;
+        background: lightgoldenrodyellow;
+        color: black;
+        border-right: 2px solid rgba(0, 0, 0, 0.2);
+
+        &:after {
+            border-color: transparent transparent transparent lightgoldenrodyellow;
+            border-width: 14px;
+        }
+
+        &.prepended-action {}
+
+        &.appended-action {
+            right: -114px;
+            top: -41px;
+        }
     }
 
     &.condition-block {
+        border-radius: 4px;
         min-width: 100px;
         display: flex;
         min-height: 140px;
@@ -125,6 +243,24 @@ body {
         align-items: center;
         padding: 12px;
         justify-content: space-between;
+        background: #B2DBBF;
+        border-right: 2px solid rgba(0, 0, 0, 0.2);
+        color: black;
+
+        &.prepended-condition {
+            top: -71px;
+            right: 65px;
+        }
+
+        &.appended-condition {
+            top: -71px;
+            left: 65px;
+        }
+
+        &:after {
+            border-color: transparent transparent transparent #B2DBBF;
+            border-width: 14px;
+        }
 
         .drop-zone,
         .drop-zone-long {
@@ -138,10 +274,16 @@ body {
             display: flex;
             justify-content: center;
             align-items: center;
+            transition: 0.2s;
+            margin: 8px 0;
+
+            &.hover {
+                box-shadow: 0 0 8px 2px cyan;
+            }
         }
 
         .drop-zone-long {
-            width: 80%;
+            width: 95%;
         }
 
         .draggable-input {
@@ -153,9 +295,10 @@ body {
         }
     }
 
-    .text {
-        margin: auto;
-        pointer-events: none;
+    &.connector .text {
+        transform: translateX(5px);
+        top: 50%;
+        transform: translateY(-50%) translateX(5px);
     }
 
     .drag-label {
@@ -176,7 +319,38 @@ body {
         opacity: 1;
         visibility: visible;
     }
+}
 
+.hide-label {
+    border: 0 !important;
+    background: transparent !important;
+}
+
+.large-box-title {
+    width: 100%;
+    text-align: center;
+    padding: 2px 0;
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.prepended-connector {
+    @include centerY;
+    position: absolute;
+    left: -70px;
+}
+
+.appended-connector {
+    @include centerY;
+    position: absolute;
+    right: -69px;
+}
+
+.text {
+    @include centerY;
+    position: relative;
+    height: fit-content;
+    font-weight: bold;
+    font-size: 11px;
 }
 
 .operator-drop {
@@ -185,12 +359,14 @@ body {
 
 .draggable-sticky {
     position: relative;
+    text-align: center;
+    opacity: 1 !important;
 
-    &.action-box {
+    &.vertical-box {
         @include centerX();
     }
 
-    &.operator-box-container {
+    &.horizontal-box {
         @include centerY();
     }
 
@@ -202,11 +378,10 @@ body {
 .draggable-shadow {
     opacity: 0.5;
     pointer-events: none;
+    text-align: center;
 }
 
 .operator-block {
-    background: #a0ffa0;
-    color: black;
     font-weight: bold;
 }
 
@@ -224,11 +399,11 @@ body {
 .action-item-box {
     position: fixed;
     left: 0px;
-    bottom: 0;
+    bottom: 80px;
     top: 80px;
     width: 169px;
     background: white;
-    padding: 110px 10px;
+    padding: 50px 10px;
     border: 2px solid rgba(0, 0, 0, 0.3);
     display: flex;
     overflow: auto;
@@ -241,6 +416,20 @@ body {
     position: fixed;
     left: 191px;
     top: 0;
+    height: 58px;
+    background: white;
+    padding: 10px 100px;
+    border: 2px solid rgba(0, 0, 0, 0.3);
+    display: flex;
+    right: 0;
+    align-items: flex-start;
+    justify-content: space-between;
+}
+
+.variable-box-container {
+    position: fixed;
+    left: 191px;
+    bottom: 0;
     height: 58px;
     background: white;
     padding: 10px 100px;

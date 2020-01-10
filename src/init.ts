@@ -1,13 +1,14 @@
-import { DragItem } from "./library";
 import { Canvas } from "./components/canvas";
 import { ActionItemBox } from "./components/action-item-box";
 import { OperatorBox } from "./components/operator-item-box";
+import { VariableBox } from "./components/variable-item-box";
 
 export class Shell {
     shell: HTMLDivElement;
     canvas: Canvas;
     actionItemBox: ActionItemBox;
     operatorItemBox: OperatorBox;
+    variableItemBox: VariableBox;
     ctrlKey: boolean;
 
     constructor() {
@@ -21,10 +22,13 @@ export class Shell {
 
         this.actionItemBox = new ActionItemBox();
         this.shell.appendChild(this.actionItemBox.element);
-        
+
         this.operatorItemBox = new OperatorBox();
         this.shell.appendChild(this.operatorItemBox.element);
-        
+
+        this.variableItemBox = new VariableBox();
+        this.shell.appendChild(this.variableItemBox.element);
+
         document.onkeydown = (k: KeyboardEvent) => {
             let keyCode = k.keyCode;
             if (k.ctrlKey) {
@@ -35,11 +39,11 @@ export class Shell {
                     var toRemove: any = {};
                     let i = 0;
                     this.canvas.dragItems.forEach((item) => {
-                       if (item.selected) {
-                           toRemove[i] = item;
-                           item.element.remove();
-                       }
-                       i++;
+                        if (item.selected) {
+                            toRemove[i] = item;
+                            item.element.remove();
+                        }
+                        i++;
                     });
                     for (let i = 0; i < this.canvas.dragItems.length; i++) {
                         if (toRemove[i] !== undefined && toRemove[i] !== null) {

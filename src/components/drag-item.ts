@@ -1,8 +1,10 @@
+import { ConditionBlock, printLn } from '../library';
 import { applicationShell, zIndexPlus } from '../library'
-import { Canvas } from './canvas';
+import { OperatorBlock } from './draggable-types/operator-block';
+import { VariableBlock } from './draggable-types/variable-block';
 
 export enum DraggableType { CONNECTOR, CONNECTOR_LARGE, SQUARE, SQUARE_LARGE, ROUNDED }
-export enum DraggableFunction {CONDITION, OPERATOR}
+export enum DraggableFunction { CONDITION, OPERATOR, VARIABLE, IF, AND, OR, THEN, ELSE, ACTION }
 
 export class DragItem {
     name: string;
@@ -15,6 +17,10 @@ export class DragItem {
     isAnchored: boolean;
     anchoredTo: DragItem;
     anchoredItems: Array<DragItem> = new Array<DragItem>();
+    prepend: DragItem;
+    append: DragItem;
+    operator: DragItem;
+    variable: DragItem;
 
     constructor(name: string, isSticky: boolean = false, type: DraggableType = DraggableType.SQUARE, draggableFunction: DraggableFunction = null) {
 
@@ -39,10 +45,34 @@ export class DragItem {
         this.shadowElement.classList.add('draggable-shadow');
         this.shadowElement.innerHTML = innerHtml;
 
+        if (this.isSticky) {
+            this.element.classList.add('draggable-sticky');
+        }
+
         switch (this.type) {
             case DraggableType.CONNECTOR: {
                 this.element.classList.add('pointer');
+                this.element.classList.add('connector');
+
                 this.shadowElement.classList.add('pointer');
+                this.shadowElement.classList.add('connector');
+
+                let triangleDrop = document.createElement('div');
+                triangleDrop.classList.add('triangle-crop');
+                this.element.appendChild(triangleDrop);
+                break;
+            }
+            case DraggableType.CONNECTOR_LARGE: {
+                this.element.classList.add('connector-large');
+                this.shadowElement.classList.add('connector-large');
+
+                let triangleDrop = document.createElement('div');
+                triangleDrop.classList.add('triangle-crop');
+                this.element.appendChild(triangleDrop);
+
+                let triangleDropShadow = document.createElement('div');
+                triangleDropShadow.classList.add('triangle-crop');
+                this.element.appendChild(triangleDropShadow);
                 break;
             }
             case DraggableType.SQUARE: {
@@ -77,26 +107,26 @@ export class DragItem {
                     dragItem.select(false);
                 });
             }
-            
+
             this.select(true);
         }
 
     }
-    
+
     mouseDown(e: MouseEvent): void {
         let isDraggingChild = false;
         this.anchoredItems.forEach((item) => {
-           if (item === applicationShell.canvas.draggingItem) {
-               isDraggingChild = true;
-           } 
+            if (item === applicationShell.canvas.draggingItem) {
+                isDraggingChild = true;
+            }
         });
-        
+
         if (isDraggingChild) {
             return;
         }
-        
-        console.log(isDraggingChild);
-        
+
+        document.body.dataset.dragging = 'true';
+
         applicationShell.canvas.draggingItem = this;
 
         zIndexPlus(this.element);
@@ -106,7 +136,6 @@ export class DragItem {
 
         if (this.isAnchored) {
             this.anchor(false);
-            applicationShell.canvas.element.append(this.element);
             this.element.style.left = `${startingX - 2}px`;
             this.element.style.top = `${startingY - this.element.offsetHeight / 2}px`;
         }
@@ -128,16 +157,16 @@ export class DragItem {
     }
 
     mouseMove(e: MouseEvent, startingX: number, startingY: number, originalLeft: number, originalTop: number, dragElement: HTMLElement): void {
-        this.element.style.pointerEvents = 'none';
+        this.element.dataset.dragging = 'true';
         let currentX = e.x;
         let currentY = e.y;
-        
+
         let diffX = currentX - startingX;
         let diffY = currentY - startingY;
-        
+
         let newLeft: string = `${originalLeft + diffX}px`;
         let newTop: string = `${originalTop + diffY}px`;
-        
+
         dragElement.style.left = newLeft;
         dragElement.style.top = newTop;
     }
@@ -149,7 +178,7 @@ export class DragItem {
         this.element.dataset.selected = select.toString();
         this.selected = select;
     }
-    
+
     anchor(anchor: boolean, anchoredTo: DragItem = null): void {
         this.isAnchored = anchor;
         if (anchor) {
@@ -162,7 +191,39 @@ export class DragItem {
             this.anchoredTo.anchoredItems.push(this);
         }
         else {
+            if (this.anchoredTo.prepend !== undefined && this.anchoredTo.prepend !== null && this.anchoredTo.prepend === this) {
+                this.anchoredTo.prepend = null;
+            }
+            else if (this.anchoredTo.append !== undefined && this.anchoredTo.append !== null && this.anchoredTo.append === this) {
+                this.anchoredTo.append = null;
+            }
+            if (this.draggableFunction === DraggableFunction.VARIABLE && this.anchoredTo instanceof ConditionBlock) {
+                printLn('destroy')
+                $(`#${this.anchoredTo.variableID}`).select2('destroy');
+                document.getElementById(`${this.anchoredTo.variableID}`).remove();
+                let variablePlaceHolder = document.createElement('div');
+                variablePlaceHolder.classList.add('drop-zone');
+                variablePlaceHolder.classList.add('variable-value');
+                variablePlaceHolder.innerHTML = 'Value';
+                this.anchoredTo.element.insertBefore(variablePlaceHolder, document.querySelector('.action-drop-prepend'));
+            }
+
+
             this.element.classList.remove('grounded');
+            this.element.classList.remove('appended-connector');
+            this.element.classList.remove('prepended-connector');
+            this.element.classList.remove('prepended-condition');
+            this.element.classList.remove('appended-condition');
+            this.element.classList.remove('prepended-action');
+            this.element.classList.remove('appended-action');
+
+            if (this.draggableFunction === DraggableFunction.VARIABLE) {
+                this.element.parentElement.classList.remove('hide-label');
+            }
+
+            this.element.remove();
+            applicationShell.canvas.element.append(this.element);
+            anchoredTo = null;
         }
     }
 }
